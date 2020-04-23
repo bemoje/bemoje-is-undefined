@@ -12,10 +12,5 @@ export default {
 			format: 'umd',
 			name: packageName,
 		},
-		{
-			file: 'dist/' + packageName + '.cjs.js',
-			format: 'cjs',
-			name: packageName,
-		},
 	],
 }
