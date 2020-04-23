@@ -1,0 +1,14 @@
+benchmark
+coverage
+credentials
+node_modules
+scripts
+src
+test
+index.js
+.gitignore
+.travis.yml
+babel.config.js
+jest.config.js
+.DS_Store
+.git

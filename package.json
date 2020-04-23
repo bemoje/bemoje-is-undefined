@@ -1,0 +1,83 @@
+{
+	"name": "@bemoje/is-undefined",
+	"version": "1.0.8943",
+	"description": "Check whether the provided value is undefined.",
+	"main": "dist/is-undefined.umd.js",
+	"module": "dist/is-undefined.esm.js",
+	"browser": "dist/is-undefined.umd.js",
+	"github": {
+		"user": "bemoje"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/bemoje/bemoje-is-undefined.git"
+	},
+	"directories": {
+		"benchmark": "benchmarking scripts",
+		"coverage": "code test coverage report",
+		"examples": "usage examples",
+		"src": "source files",
+		"scripts": "scripts used to manage repo/package",
+		"test": "code tests for Jest",
+		"dist": "various module distribution files"
+	},
+	"scripts": {
+		"test": "jest",
+		"example": "node -r esm example/is-undefined.example.js",
+		"docs": "documentation build src/** -f md -o docs/api.md && documentation build src/** -f html -o docs",
+		"rollup": "rollup -c",
+		"bench": "node -r esm benchmark/is-undefined.benchmark.js",
+		"repo": "node -r esm scripts/repo.js",
+		"clean": "rimraf",
+		"major": "npm run repo bumpVersionMajor",
+		"minor": "npm run repo bumpVersionMinor",
+		"patch": "npm run repo bumpVersionPatch",
+		"readme": "npm run repo writeReadme",
+		"rename": "npm run repo rename",
+		"description": "npm run repo description",
+		"keywords": "npm run repo keywords",
+		"build": "npm run test && npm run bench && npm run rollup && npm run docs && npm run readme",
+		"git-commit": "npm run repo gitCommit",
+		"git-delete": "rimraf .git && bash scripts/github-delete.sh bemoje bemoje-is-undefined",
+		"git-create": "npm run repo gitCreate",
+		"publish-npm": "npm run repo npmPublish",
+		"publish": "npm run repo publish"
+	},
+	"bugs": {
+		"url": "https://github.com/bemoje/bemoje-is-undefined/issues",
+		"email": "bemoje@gmail.com"
+	},
+	"author": {
+		"name": "Benjamin M. Jensen",
+		"email": "bemoje@gmail.com",
+		"web": "https://github.io/bemoje/"
+	},
+	"esm": {
+		"await": true,
+		"force": true,
+		"wasm": true
+	},
+	"license": "MIT",
+	"dependencies": {},
+	"devDependencies": {
+		"esm": "^3.2.25",
+		"@babel/preset-env": "^7.9.5",
+		"babel-core": "^6.26.3",
+		"babel-jest": "^23.6.0",
+		"babel-preset-env": "^1.7.0",
+		"documentation": "^12.3.0",
+		"fs": "0.0.1-security",
+		"hirestime": "^6.0.1",
+		"jest": "^24.9.0",
+		"path": "^0.12.7",
+		"rimraf": "^3.0.2",
+		"rollup": "^1.32.1",
+		"rollup-plugin-commonjs": "^10.1.0",
+		"rollup-plugin-node-resolve": "^5.2.0",
+		"walk-sync": "^2.1.0"
+	},
+	"keywords": [
+		"is",
+		"undefined"
+	]
+}
