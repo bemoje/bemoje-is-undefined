@@ -53,7 +53,7 @@ isUndefined(null)
 ```
 
 ## Benchmark
-75500 nanoseconds
+73300 nanoseconds
 ## Tests
 Uses *Jest* to test module functionality. Run tests to get coverage details.
 
