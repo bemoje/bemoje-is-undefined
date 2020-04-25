@@ -1,2 +1,2 @@
 ## Benchmark
-79900 nanoseconds
+75500 nanoseconds

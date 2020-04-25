@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'fs-extra'
 import hirestime from 'hirestime'
 import path from 'path'
 import isUndefined from '../src/is-undefined'

@@ -53,7 +53,7 @@ isUndefined(null)
 ```
 
 ## Benchmark
-79900 nanoseconds
+75500 nanoseconds
 ## Tests
 Uses *Jest* to test module functionality. Run tests to get coverage details.
 
@@ -68,7 +68,7 @@ Check whether the provided value is undefined.
 
 ##### Parameters
 
--   `value` **any** The value
+-   `value` **any** The value to evaluate.
 
 ##### Returns
 **[boolean][3]** 

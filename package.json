@@ -1,6 +1,6 @@
 {
    "name": "@bemoje/is-undefined",
-   "version": "2.0.4",
+   "version": "3.0.0",
    "description": "Check whether the provided value is undefined.",
    "main": "dist/is-undefined.umd.js",
    "module": "dist/is-undefined.esm.js",
@@ -27,12 +27,11 @@
       "rename": "npm run repo rename",
       "description": "npm run repo description",
       "keywords": "npm run repo keywords",
-      "build": "npm run test && npm run bench && npm run rollup && npm run docs && npm run readme",
+      "build": "npm run test && npm run bench && npm run rollup && npm run docs && npm run description && npm run keywords && npm run readme",
       "git-commit": "npm run repo gitCommit",
       "git-delete": "rimraf .git && bash scripts/github-delete.sh bemoje bemoje-is-undefined",
       "git-create": "npm run repo gitCreate",
-      "publish-npm": "npm run repo npmPublish",
-      "publish": "npm run repo publish"
+      "publish-npm": "npm run repo npmPublish"
    },
    "bugs": {
       "url": "https://github.com/bemoje/bemoje-is-undefined/issues",
@@ -43,23 +42,28 @@
       "email": "bemoje@gmail.com",
       "web": "https://github.io/bemoje/"
    },
-   "esm": {
-      "await": true,
-      "force": true,
-      "wasm": true
-   },
    "license": "MIT",
    "dependencies": {},
    "devDependencies": {
-      "esm": "^3.2.25",
       "@babel/preset-env": "^7.9.5",
+      "@types/babel-core": "^6.25.6",
+      "@types/esm": "^3.2.0",
+      "@types/fs-extra": "^8.1.0",
+      "@types/hirestime": "^4.0.0",
+      "@types/jest": "^25.2.1",
+      "@types/rimraf": "^3.0.0",
+      "@types/rollup": "^0.54.0",
+      "@types/rollup-plugin-commonjs": "^9.3.1",
+      "@types/rollup-plugin-node-resolve": "^4.1.0",
       "babel-core": "^6.26.3",
       "babel-jest": "^23.6.0",
       "babel-preset-env": "^1.7.0",
       "documentation": "^12.3.0",
-      "fs": "0.0.1-security",
+      "esm": "^3.2.25",
+      "fs-extra": "^9.0.0",
       "hirestime": "^6.0.1",
       "jest": "^24.9.0",
+      "keyword-extractor": "0.0.18",
       "path": "^0.12.7",
       "rimraf": "^3.0.2",
       "rollup": "^1.32.1",
@@ -68,7 +72,10 @@
       "walk-sync": "^2.1.0"
    },
    "keywords": [
-      "is",
-      "undefined"
+      "check",
+      "provided",
+      "undefined",
+      "isundefined",
+      "evaluate"
    ]
 }

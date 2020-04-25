@@ -4,7 +4,7 @@ export default {
 	input: 'src/' + packageName + '.js',
 	output: [
 		{
-			file: 'dist/' + packageName + '.es.js',
+			file: 'dist/' + packageName + '.esm.js',
 			format: 'esm',
 		},
 		{

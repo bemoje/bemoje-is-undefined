@@ -1,5 +1,6 @@
 import { exec as exe } from 'child_process'
-import fs from 'fs'
+import fs from 'fs-extra'
+import { extract as extractKeywords } from 'keyword-extractor'
 import path from 'path'
 import walkSync from 'walk-sync'
 
@@ -14,86 +15,38 @@ function capFirstLetter(str) {
 }
 
 const repo = new (class {
-	constructor() {}
 	get packagePath() {
 		return path.join(process.cwd(), 'package.json')
 	}
-	get packageLockPath() {
-		return path.join(process.cwd(), 'package-lock.json')
-	}
-	get package() {
-		return JSON.parse(this.readFile(this.packagePath))
-	}
-	get srcDirPath() {
-		return path.join(process.cwd(), 'src')
-	}
-	get testDirPath() {
-		return path.join(process.cwd(), 'test')
-	}
-	get scriptsDirPath() {
-		return path.join(process.cwd(), 'scripts')
-	}
+
 	get examplesDirPath() {
 		return path.join(process.cwd(), 'examples')
 	}
-	get docsDirPath() {
-		return path.join(process.cwd(), 'docs')
+
+	get package() {
+		return JSON.parse(this.readFile(this.packagePath))
 	}
-	get distDirPath() {
-		return path.join(process.cwd(), 'dist')
-	}
-	get coverageDirPath() {
-		return path.join(process.cwd(), 'coverage')
-	}
-	get node_modulesDirPath() {
-		return path.join(process.cwd(), 'node_modules')
-	}
-	get node_modulesNames() {
-		return this.filesIn(this.node_modulesDirPath)
-	}
-	get srcEntryFilePath() {
-		return path.join(process.cwd(), 'src')
-	}
-	get configBabelPath() {
-		return path.join(process.cwd(), 'babel.config.json')
-	}
-	get configTravisPath() {
-		return path.join(process.cwd(), 'travis.yml')
-	}
-	get configGitIgnorePath() {
-		return path.join(process.cwd(), '.gitignore')
-	}
-	get configNpmIgnorePath() {
-		return path.join(process.cwd(), '.npmignore')
-	}
-	get indexJsPath() {
-		return path.join(process.cwd(), 'index.js')
-	}
-	get configJestPath() {
-		return path.join(process.cwd(), 'jest.config.js')
-	}
-	get configRollupPath() {
-		return path.join(process.cwd(), 'rollup.config.js')
-	}
-	get readmePath() {
-		return path.join(process.cwd(), 'readme.md')
-	}
+
 	get githubPassword() {
 		return require(path.join(process.cwd(), 'credentials', 'github.json'))
 			.github
 	}
+
 	readFile(filePath) {
 		return fs.readFileSync(filePath).toString()
 	}
+
 	filesIn(dirPath) {
 		return fs.readdirSync(dirPath)
 	}
+
 	packageWrite(callback) {
-		return fs.writeFileSync(
+		fs.writeFileSync(
 			this.packagePath,
 			JSON.stringify(callback(this.package), null, 3),
 		)
 	}
+
 	bumpVersionMajor() {
 		this.packageWrite((pkg) => {
 			const arrVersion = pkg.version.split('.').map(Number)
@@ -104,6 +57,7 @@ const repo = new (class {
 			return pkg
 		})
 	}
+
 	bumpVersionMinor() {
 		this.packageWrite((pkg) => {
 			const arrVersion = pkg.version.split('.').map(Number)
@@ -113,6 +67,7 @@ const repo = new (class {
 			return pkg
 		})
 	}
+
 	bumpVersionPatch() {
 		this.packageWrite((pkg) => {
 			const arrVersion = pkg.version.split('.').map(Number)
@@ -121,6 +76,7 @@ const repo = new (class {
 			return pkg
 		})
 	}
+
 	async exec(cmd) {
 		return new Promise((resolve, reject) => {
 			try {
@@ -131,10 +87,10 @@ const repo = new (class {
 						stdout: splitLines(stdout),
 						stderr: splitLines(stderr),
 						print: () => {
-							console.log(data.cmd)
+							log(data.cmd)
 							if (data.stdout) {
 								for (let out of data.stdout) {
-									console.log(out)
+									log(out)
 								}
 							}
 							if (data.stderr) {
@@ -151,31 +107,10 @@ const repo = new (class {
 			}
 		})
 	}
-	async npmInstall(name) {
-		const o = await this.exec('npm i ' + name)
-		o.print()
-	}
-	async npmInstallSave(name) {
-		const o = await this.exec('npm i ' + name + ' --save')
-		o.print()
-	}
-	async npmInstallDev(name) {
-		const o = await this.exec('npm i ' + name + ' --save-dev')
-		o.print()
-	}
+
 	async npmPublish() {
 		const o = await this.exec('npm publish --access public')
 		o.print()
-	}
-	async runTests() {
-		const o = await this.exec('jest')
-		o.print()
-	}
-	async runExamples() {
-		this.filesIn(this.examplesDirPath).forEach(async (fileName) => {
-			const o = await this.exec('node -r esm examples/' + fileName)
-			o.print()
-		})
 	}
 
 	isDefaultExportClass() {
@@ -190,18 +125,7 @@ const repo = new (class {
 			'could not determine from source entry file if its a class export or not',
 		)
 	}
-	isDefaultExportFunction() {
-		const src = this.getSrcEntry()
-		if (src.includes('export default function')) {
-			return true
-		}
-		if (src.includes('export default class')) {
-			return false
-		}
-		return new Error(
-			'could not determine from source entry file if its a class export or not',
-		)
-	}
+
 	walkFiles(callback) {
 		walkSync(process.cwd(), {
 			directories: false,
@@ -211,6 +135,7 @@ const repo = new (class {
 			callback(path)
 		})
 	}
+
 	replaceInAllFileNames(strFind, strReplace) {
 		this.walkFiles((filePath) => {
 			const arr = filePath.split('/')
@@ -221,13 +146,15 @@ const repo = new (class {
 			}
 		})
 	}
+
 	replaceInAllFileContent(strFind, strReplace) {
 		this.walkFiles((filePath) => {
-			const src = fs.readFileSync(filePath).toString()
+			const src = this.readFile(filePath)
 			const strNew = src.replace(new RegExp(strFind, 'g'), strReplace)
 			fs.writeFileSync(filePath, strNew)
 		})
 	}
+
 	getSrcEntryPath() {
 		const arr = this.package.name.split('/')
 		let filename
@@ -238,9 +165,11 @@ const repo = new (class {
 		}
 		return path.join(process.cwd(), 'src', filename + '.js')
 	}
+
 	getSrcEntry() {
-		return fs.readFileSync(this.getSrcEntryPath()).toString()
+		return this.readFile(this.getSrcEntryPath())
 	}
+
 	parseName(fullName = this.package.name) {
 		let isClass = this.isDefaultExportClass()
 		let name = fullName
@@ -283,6 +212,7 @@ const repo = new (class {
 			repoName,
 		}
 	}
+
 	async rename(name) {
 		const oCurrent = this.parseName(this.package.name)
 		const oNew = this.parseName(name)
@@ -292,7 +222,7 @@ const repo = new (class {
 			oNew.scope = oCurrent.scope
 		}
 
-		console.log({ oCurrent, oNew })
+		log({ oCurrent, oNew })
 
 		this.replaceInAllFileNames(oCurrent.atScope, oNew.atScope)
 		this.replaceInAllFileContent(oCurrent.atScope, oNew.atScope)
@@ -306,7 +236,8 @@ const repo = new (class {
 		const res = await this.exec('npm run build')
 		res.print()
 	}
-	api() {
+
+	listApi() {
 		const proto = this.constructor.prototype
 		let protoKeys = Object.getOwnPropertyNames(proto)
 		protoKeys = protoKeys.map((key, i) => {
@@ -317,22 +248,9 @@ const repo = new (class {
 				return key
 			}
 		})
-		console.log(protoKeys.sort().join('\n'))
+		log(protoKeys.sort().join('\n'))
 	}
-	wipeDir(relativeDirPath) {
-		walkSync(path.join(process.cwd(), ...relativeDirPath.split('/')), {
-			directories: true,
-			includeBasePath: false,
-		}).forEach((filePath) => {
-			fs.unlinkSync(filepath)
-		})
-	}
-	removeDir(relativeDirPath) {
-		fs.unlinkSync(path.join(process.cwd(), ...relativeDirPath.split('/')))
-	}
-	removeFile(relativeFilePath) {
-		fs.unlinkSync(path.join(process.cwd(), ...relativeFilePath.split('/')))
-	}
+
 	writeReadme() {
 		const {
 			method,
@@ -450,7 +368,7 @@ const repo = new (class {
 					'results.md',
 				)
 				if (fs.existsSync(benchResultsPath)) {
-					return fs.readFileSync(benchResultsPath)
+					return this.readFile(benchResultsPath)
 				}
 				return ''
 			})(),
@@ -467,6 +385,7 @@ const repo = new (class {
 		const filePath = path.join(process.cwd(), 'readme.md')
 		fs.writeFileSync(filePath, str, 'utf8')
 	}
+
 	getApi() {
 		const apiPath = path.join(process.cwd(), 'docs', 'api.md')
 		if (fs.existsSync(apiPath)) {
@@ -498,10 +417,12 @@ const repo = new (class {
 		}
 		return ''
 	}
+
 	async gitCommit() {
 		const data = await this.exec('bash scripts/github-commit.sh')
 		data.print()
 	}
+
 	async gitCreate() {
 		const user = this.package.github.user
 		const pw = this.githubPassword
@@ -517,10 +438,59 @@ const repo = new (class {
 		data.print()
 	}
 
-	keywords(...words) {
+	keywords() {
 		this.packageWrite((pack) => {
-			pack.keywords = words
+			pack.keywords = this.getKeywords()
 			return pack
+		})
+	}
+
+	getBlockComments() {
+		const dirPath = path.join(process.cwd(), 'src')
+		return this.filesIn(dirPath)
+			.map((fileName) => {
+				return path.join(dirPath, fileName)
+			})
+			.map((filePath) => {
+				return this.readFile(filePath)
+			})
+			.map((str) => {
+				let inBlock = false
+				return splitLines(str)
+					.reduce((accum, line, i) => {
+						if (line.includes('/**')) {
+							inBlock = true
+						} else if (line.includes('*/')) {
+							inBlock = false
+						} else if (inBlock) {
+							accum.push(line.replace('*', '').trim())
+						}
+						return accum
+					}, [])
+					.join(' ')
+			})
+	}
+
+	getKeywords() {
+		const str =
+			this.getBlockComments()
+				.map((comment) => {
+					return comment
+						.split(' ')
+						.filter((word) => {
+							return !word.includes('@') && !word.includes('{')
+						})
+						.join(' ')
+				})
+				.join('\n') +
+			' ' +
+			this.parseName().method.split('-').join(' ')
+
+		return extractKeywords(str, {
+			language: 'english',
+			remove_digits: true,
+			return_changed_case: true,
+			remove_duplicates: true,
 		})
 	}
 
@@ -564,7 +534,7 @@ const main = async () => {
 		const methodName = args.shift()
 		return await repo[methodName](...args)
 	} catch (err) {
-		console.log(err)
+		log(err)
 	}
 }
 
@@ -577,5 +547,5 @@ main()
 		process.exit(0)
 	})
 	.catch((err) => {
-		console.log(err)
+		log(err)
 	})
