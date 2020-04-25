@@ -344,7 +344,6 @@ const repo = new (class {
 			'## Usage',
 			'',
 			'```javascript',
-			'// import library',
 			'import ' + method + " from '" + fullName + "'",
 			'',
 			this.filesIn(this.examplesDirPath)
