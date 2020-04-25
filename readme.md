@@ -35,7 +35,6 @@ npm install --save-dev @bemoje/is-undefined
 ## Usage
 
 ```javascript
-// import library
 import isUndefined from '@bemoje/is-undefined'
 
 isUndefined(void 0)
@@ -53,7 +52,7 @@ isUndefined(null)
 ```
 
 ## Benchmark
-73300 nanoseconds
+70501 nanoseconds
 ## Tests
 Uses *Jest* to test module functionality. Run tests to get coverage details.
 
