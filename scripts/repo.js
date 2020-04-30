@@ -113,19 +113,6 @@ const repo = new (class {
 		o.print()
 	}
 
-	isDefaultExportClass() {
-		const src = this.getSrcEntry()
-		if (src.includes('export default class')) {
-			return true
-		}
-		if (src.includes('export default function')) {
-			return false
-		}
-		return new Error(
-			'could not determine from source entry file if its a class export or not',
-		)
-	}
-
 	walkFiles(callback) {
 		walkSync(process.cwd(), {
 			directories: false,
@@ -171,7 +158,6 @@ const repo = new (class {
 	}
 
 	parseName(fullName = this.package.name) {
-		let isClass = this.isDefaultExportClass()
 		let name = fullName
 		let isScoped = false
 		let scope = ''
@@ -187,15 +173,11 @@ const repo = new (class {
 
 		let method = name
 			.split('-')
-			.map((str, i) => {
+			.map((part, i) => {
 				if (i === 0) {
-					if (isClass) {
-						return capFirstLetter(str)
-					} else {
-						return str
-					}
+					return part
 				} else {
-					return capFirstLetter(str)
+					return capFirstLetter(part)
 				}
 			})
 			.join('')
@@ -206,7 +188,6 @@ const repo = new (class {
 			fullName,
 			name,
 			isScoped,
-			isClass,
 			scope,
 			atScope,
 			repoName,
@@ -232,9 +213,6 @@ const repo = new (class {
 
 		this.replaceInAllFileNames(oCurrent.method, oNew.method)
 		this.replaceInAllFileContent(oCurrent.method, oNew.method)
-
-		const res = await this.exec('npm run build')
-		res.print()
 	}
 
 	listApi() {
@@ -257,7 +235,6 @@ const repo = new (class {
 			fullName,
 			name,
 			isScoped,
-			isClass,
 			scope,
 			atScope,
 			repoName,
@@ -344,18 +321,21 @@ const repo = new (class {
 			'## Usage',
 			'',
 			'```javascript',
-			'import ' + method + " from '" + fullName + "'",
 			'',
 			this.filesIn(this.examplesDirPath)
 				.map((filePath) => {
 					const lines = this.readFile(
 						path.join(this.examplesDirPath, filePath),
 					).split(/\r\n|\r|\n/gm)
-					lines.shift()
-					if (lines[0].length === 0) {
-						lines.shift()
-					}
-					return lines.join('\n')
+					lines[0] = lines[0].replace(
+						/ from '(.+)'/,
+						" from '" + fullName + "'",
+					)
+					return lines
+						.map((line) => {
+							return line.replace(/\t/g, '  ')
+						})
+						.join('\n')
 				})
 				.join('\n\n'),
 			'```',
@@ -389,7 +369,6 @@ const repo = new (class {
 		const apiPath = path.join(process.cwd(), 'docs', 'api.md')
 		if (fs.existsSync(apiPath)) {
 			let lines = splitLines(this.readFile(apiPath))
-			lines.shift()
 			lines = lines
 				.map((line) => {
 					if (line.includes('###')) {
@@ -403,16 +382,7 @@ const repo = new (class {
 					}
 					return line
 				})
-				.map((line) => {
-					if (line.indexOf('Returns ') === 0) {
-						return line.replace('Returns ', '##### Returns\n')
-					}
-					return line
-				})
-			lines = lines.join('\n\n')
-			return (
-				'#' + lines.slice(lines.indexOf('## ' + this.parseName().method))
-			)
+			return lines.join('\n\n')
 		}
 		return ''
 	}
@@ -434,7 +404,6 @@ const repo = new (class {
 		)
 		data.print()
 		data = await this.gitCommit()
-		data.print()
 	}
 
 	keywords() {
@@ -518,6 +487,15 @@ const repo = new (class {
 		if (str.length !== 0) {
 			this.packageWrite((pack) => {
 				pack.description = str
+				return pack
+			})
+		}
+	}
+
+	version(strVersion) {
+		if (/^\d*\.\d*\.\d*$/.test(strVersion)) {
+			this.packageWrite((pack) => {
+				pack.version = strVersion
 				return pack
 			})
 		}
